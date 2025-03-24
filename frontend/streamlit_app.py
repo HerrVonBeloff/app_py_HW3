@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 
 # --- Настройки ---
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "https://app-py-hw3.onrender.com"
 MOSCOW_TZ = pytz.timezone("Europe/Moscow")
 
 # --- Стилизация ---
