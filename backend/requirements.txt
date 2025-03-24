@@ -3,8 +3,11 @@ uvicorn
 gunicorn
 sqlalchemy
 psycopg2-binary
-pydantic
+pydantic[email]
 python-dotenv
 python-jose
 python-jose[cryptography]
 passlib
+pytz
+redis
+python-multipart
