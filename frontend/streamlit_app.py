@@ -69,7 +69,7 @@ with st.form("create_form"):
         data = {
         "original_url": original_url,
         "custom_alias": custom_alias,
-        "is_permanent": is_permanent if st.session_state.token else None
+        "is_permanent": is_permanent if st.session_state.token else False
         }
 
         st.write("Отправляем в API:", data)
