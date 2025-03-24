@@ -58,7 +58,7 @@ else:
                 st.success("✅ Регистрация успешна! Теперь войдите.")
             else:
                 st.error("Ошибка регистрации")
-st.write(st.session_state.token)
+                
 # --- Основная форма создания ссылки ---
 st.subheader("✨ Создать короткую ссылку")
 with st.form("create_form"):
@@ -73,6 +73,7 @@ with st.form("create_form"):
         }
 
         st.write("Отправляем в API:", data)
+        st.write(get_auth_headers())
         response = requests.post(f"{API_BASE_URL}/links/shorten", json=data, headers=get_auth_headers())
         if response.status_code in [200, 201]:
             response_data = response.json()
