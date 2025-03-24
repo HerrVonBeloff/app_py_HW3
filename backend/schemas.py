@@ -34,7 +34,7 @@ class Link(BaseModel):
 class LinkCreate(BaseModel):
     original_url: str
     custom_alias: Optional[str] = None
-    is_permanent: Optional[bool] = None  # Может быть None (автоматически определяется)
+    is_permanent: Optional[bool] = True  # Может быть None (автоматически определяется)
     expires_at: Optional[datetime] = None  # Можно задать срок истечения
     owner_id: Optional[int] = None
     
