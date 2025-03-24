@@ -85,11 +85,8 @@ def create_short_link(
     if not current_user:
         link.is_permanent = False
         link.expires_at = datetime.now() + timedelta(days=1)
-
-    # Если пользователь авторизован
     else:
-        if link.is_permanent is None:  
-            link.is_permanent = False  # Если is_permanent не указан, делаем временную ссылку
+        if link.is_permanent is False: 
             link.expires_at = datetime.now() + timedelta(days=1)
 
     return crud.create_link(db, link, user=current_user)
