@@ -15,7 +15,7 @@ st.markdown("---")
 
 # --- Функции ---
 def get_auth_headers():
-    return {"Authorization": f"Bearer {st.session_state.token}"} if st.session_state.token else {}
+    return {"token": f"{st.session_state.token}}" if st.session_state.token else {}
 
 def format_datetime(dt_str: str | None) -> str:
     if not dt_str:
