@@ -16,3 +16,15 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+import redis
+import os
+
+# Получаем URL Redis из переменных окружения
+REDIS_URL = os.getenv("REDIS_URL")
+
+if not REDIS_URL:
+    raise ValueError("❌ Переменная окружения REDIS_URL не установлена!")
+
+# Подключаемся к Redis
+redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
