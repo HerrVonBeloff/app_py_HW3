@@ -84,7 +84,7 @@ def create_short_link(
     # Если пользователь анонимный, он может создать ТОЛЬКО временную ссылку на 24 часа
     if not current_user:
         link.is_permanent = False
-        link.expires_at = datetime.now() + timedelta(days=1)
+        link.expires_at = datetime.now(timezone.utc) + timedelta(days=1)
     else:
         if link.is_permanent is False: 
             link.expires_at = datetime.now() + timedelta(days=1)
