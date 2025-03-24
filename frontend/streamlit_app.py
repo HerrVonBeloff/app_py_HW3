@@ -14,8 +14,9 @@ st.title("🔗 Умный (или не очень) сервис сокращен
 st.markdown("---")
 
 # --- Функции ---
-def get_auth_headers():
-    return {"token": f"{st.session_state.token}"} if st.session_state.token else {}
+def get_auth_headers() -> dict:
+    token = st.session_state.get("token")
+    return {"Authorization": f"Bearer {token}"} if token else {}
 
 def format_datetime(dt_str: str | None) -> str:
     if not dt_str:
