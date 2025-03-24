@@ -66,7 +66,13 @@ with st.form("create_form"):
     custom_alias = st.text_input("Кастомный код (опционально)")
     is_permanent = st.checkbox("Сделать вечной (доступно только авторизованным пользователям)", value=False, disabled=not st.session_state.token)
     if st.form_submit_button("Создать"):
-        data = {"original_url": original_url, "custom_alias": custom_alias, "is_permanent": is_permanent if st.session_state.token else None}
+        data = {
+        "original_url": original_url,
+        "custom_alias": custom_alias,
+        "is_permanent": is_permanent if st.session_state.token else None
+        }
+
+        st.write("Отправляем в API:", data)
         response = requests.post(f"{API_BASE_URL}/links/shorten", json=data, headers=get_auth_headers())
         if response.status_code in [200, 201]:
             response_data = response.json()
