@@ -9,3 +9,4 @@ python-jose
 python-jose[cryptography]
 passlib
 pytz
+redis
