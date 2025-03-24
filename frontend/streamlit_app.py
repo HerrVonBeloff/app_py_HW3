@@ -58,7 +58,7 @@ else:
                 st.success("✅ Регистрация успешна! Теперь войдите.")
             else:
                 st.error("Ошибка регистрации")
-
+st.write(st.session_state.token)
 # --- Основная форма создания ссылки ---
 st.subheader("✨ Создать короткую ссылку")
 with st.form("create_form"):
