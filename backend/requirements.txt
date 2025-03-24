@@ -5,3 +5,5 @@ sqlalchemy
 psycopg2-binary
 pydantic
 python-dotenv
+python-jose
+python-jose[cryptography]
