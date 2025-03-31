@@ -73,7 +73,10 @@ with st.form("create_form"):
         "is_permanent": is_permanent if st.session_state.token else None
         }
 
+<<<<<<< HEAD
         st.write("Отправляем в API:", data)
+=======
+>>>>>>> ad7eeb9248b6a82777064e185141f579273ef9cb
         response = requests.post(f"{API_BASE_URL}/links/shorten", json=data, headers=get_auth_headers())
         if response.status_code in [200, 201]:
             response_data = response.json()
