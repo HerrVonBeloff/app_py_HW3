@@ -1,5 +1,6 @@
 # Сервис сокращения ссылок
 Ссылка на API https://app-py-hw3.onrender.com/docs
+
 Ссылка на Streamlit https://app-py-hw3.streamlit.app/
 ## Описание проекта
 Это FastAPI-приложение для сокращения длинных URL-адресов с возможностью:
