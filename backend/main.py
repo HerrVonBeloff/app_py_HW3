@@ -79,17 +79,21 @@ def create_short_link(
     db: Session = Depends(get_db),
     current_user: Optional[models.User] = Depends(get_current_user)
 ):
-    """Создание ссылки. Временные (24 ч) для анонимных, вечные — если is_permanent=True у авторизованных."""
-    
-    # Если пользователь анонимный, он может создать ТОЛЬКО временную ссылку на 24 часа
-    if not current_user:
-        link.is_permanent = False
-        link.expires_at = datetime.now(timezone.utc) + timedelta(days=1)
-    else:
-        if link.is_permanent is False: 
-            link.expires_at = datetime.now() + timedelta(days=1)
-
-    return crud.create_link(db, link, user=current_user)
+    try:
+        # Попытка создания ссылки
+        return crud.create_link(db, link, user=current_user)
+    except ValueError as e:
+        # Обработка случая, когда короткий код уже существует
+        if "уже существует" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Этот короткий код уже используется. Пожалуйста, выберите другой."
+            )
+        # Обработка других ошибок
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
 
