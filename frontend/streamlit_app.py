@@ -42,74 +42,106 @@ else:
         username = st.text_input("Логин", key="login_username")
         password = st.text_input("Пароль", type="password", key="login_password")
         if st.button("Войти"):
-            response = requests.post(f"{API_BASE_URL}/token", data={"username": username, "password": password})
-            if response.status_code == 200:
+            try:
+                response = requests.post(f"{API_BASE_URL}/token", data={"username": username, "password": password})
+                response.raise_for_status()
                 st.session_state.token = response.json()["access_token"]
                 st.session_state.current_user = username
                 st.rerun()
-            else:
-                st.error("Ошибка авторизации")
+            except requests.exceptions.RequestException as e:
+                st.error(f"Ошибка авторизации: {e.response.json().get('detail', 'Неверные учетные данные')}")
+    
     with tab_register:
         new_username = st.text_input("Новый логин", key="register_username")
         new_email = st.text_input("Email", key="register_email")
         new_password = st.text_input("Пароль", type="password", key="register_password")
         if st.button("Зарегистрироваться"):
-            response = requests.post(f"{API_BASE_URL}/register", json={"username": new_username, "email": new_email, "password": new_password})
-            if response.status_code == 200:
+            try:
+                response = requests.post(
+                    f"{API_BASE_URL}/register", 
+                    json={"username": new_username, "email": new_email, "password": new_password}
+                )
+                response.raise_for_status()
                 st.success("✅ Регистрация успешна! Теперь войдите.")
-            else:
-                st.error("Ошибка регистрации")
+            except requests.exceptions.RequestException as e:
+                error_detail = e.response.json().get('detail', 'Ошибка регистрации')
+                st.error(f"Ошибка регистрации: {error_detail}")
 
 # --- Основная форма создания ссылки ---
 st.subheader("✨ Создать короткую ссылку")
 with st.form("create_form"):
-    original_url = st.text_input("Введите длинную ссылку")
-    custom_alias = st.text_input("Кастомный код (опционально)")
-    is_permanent = st.checkbox("Сделать вечной (доступно только авторизованным пользователям)", value=False, disabled=not st.session_state.token)
+    original_url = st.text_input("Введите длинную ссылку", placeholder="https://example.com")
+    custom_alias = st.text_input("Кастомный код (опционально)", placeholder="myalias")
+    is_permanent = st.checkbox(
+        "Сделать вечной (доступно только авторизованным пользователям)", 
+        value=False, 
+        disabled=not st.session_state.token
+    )
+    
     if st.form_submit_button("Создать"):
-        data = {
-        "original_url": original_url,
-        "custom_alias": custom_alias,
-        "is_permanent": is_permanent if st.session_state.token else None
-        }
-
-<<<<<<< HEAD
-        st.write("Отправляем в API:", data)
-=======
->>>>>>> ad7eeb9248b6a82777064e185141f579273ef9cb
-        response = requests.post(f"{API_BASE_URL}/links/shorten", json=data, headers=get_auth_headers())
-        if response.status_code in [200, 201]:
+        if not original_url:
+            st.error("Пожалуйста, введите URL")
+            st.stop()
+            
+        try:
+            data = {
+                "original_url": original_url,
+                "custom_alias": custom_alias if custom_alias else None,
+                "is_permanent": is_permanent if st.session_state.token else None
+            }
+            
+            response = requests.post(
+                f"{API_BASE_URL}/links/shorten", 
+                json=data, 
+                headers=get_auth_headers()
+            )
+            response.raise_for_status()
+            
             response_data = response.json()
             short_code = response_data.get("short_code")
             if not short_code:
-                raise ValueError("Ответ не содержит short_code")
+                raise ValueError("Ответ API не содержит short_code")
+                
             short_url = f"{API_BASE_URL}/{short_code}"
             st.success(f"✅ Создана ссылка: [{short_url}]({short_url})")
-        else:
-            error_message = response.json().get("detail") or response.text
-            st.error(f"Ошибка API: {error_message}")
+            
+        except requests.exceptions.HTTPError as e:
+            error_detail = e.response.json().get('detail', 'Неизвестная ошибка')
+            if "уже существует" in error_detail.lower() or "already exists" in error_detail.lower():
+                st.error("❌ Этот короткий код уже используется. Пожалуйста, выберите другой.")
+            elif "неверные учетные данные" in error_detail.lower():
+                st.error("❌ Требуется авторизация для этого действия")
+            else:
+                st.error(f"❌ Ошибка при создании ссылки: {error_detail}")
+                
+        except Exception as e:
+            st.error(f"❌ Произошла непредвиденная ошибка: {str(e)}")
 
 # --- Блок управления ссылками ---
 with st.expander("📋 Управление ссылками"):
     # 🔍 Найти оригинальную ссылку
     st.subheader("🔍 Найти оригинальную ссылку по короткому коду")
     with st.form("search_original_form"):
-        search_code = st.text_input("Введите короткий код")
+        search_code = st.text_input("Введите короткий код", key="search_code")
         if st.form_submit_button("🔎 Найти"):
-            response = requests.get(f"{API_BASE_URL}/links/{search_code}/original")
-            if response.status_code == 200:
+            try:
+                response = requests.get(f"{API_BASE_URL}/links/{search_code}/original")
+                response.raise_for_status()
                 data = response.json()
                 st.success(f"🔗 Оригинальная ссылка: [{data['original_url']}]({data['original_url']})")
-            else:
-                st.error("Ссылка не найдена")
+            except requests.exceptions.HTTPError:
+                st.error("❌ Ссылка не найдена")
+            except Exception as e:
+                st.error(f"❌ Ошибка при поиске: {str(e)}")
 
     # 📊 Статистика ссылки
     st.subheader("📊 Статистика ссылки")
     with st.form("stats_form"):
-        stats_code = st.text_input("Короткий код для статистики")
+        stats_code = st.text_input("Короткий код для статистики", key="stats_code")
         if st.form_submit_button("Показать статистику"):
-            response = requests.get(f"{API_BASE_URL}/links/{stats_code}/stats")
-            if response.status_code == 200:
+            try:
+                response = requests.get(f"{API_BASE_URL}/links/{stats_code}/stats")
+                response.raise_for_status()
                 data = response.json()
                 st.markdown(f"""
                 **📊 Статистика ссылки:** {stats_code}
@@ -119,8 +151,10 @@ with st.expander("📋 Управление ссылками"):
                 - 🔀 **Последний переход:** {format_datetime(data['last_accessed'])}
                 - 🔢 **Количество переходов:** {data['clicks']}
                 """)
-            else:
-                st.error("Ссылка не найдена")
+            except requests.exceptions.HTTPError:
+                st.error("❌ Ссылка не найдена")
+            except Exception as e:
+                st.error(f"❌ Ошибка при получении статистики: {str(e)}")
 
 st.markdown("---")
 st.markdown("🔔 **Важно:** Ссылки удаляются автоматически, если не используются в течение 7 дней.")
